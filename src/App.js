@@ -17,7 +17,6 @@ function App(){
             const API_URL = `https://itunes.apple.com/search?term=${encodeURI(search)}`
             const response= await fetch(API_URL)
             const data= await response.json()
-            console.log(data)
             if(data.results.length>0){
                 setData(data.results)
             }else{
@@ -41,7 +40,7 @@ function App(){
                 <Routes>
                     <Route path="/" element={
                         <Fragment>
-                            <SearchBar handleSearch = {handleSearch}/>
+                            <SearchBar handleSearch={handleSearch}/>
                             <Gallery data={data} />
                         </Fragment>
                     } />

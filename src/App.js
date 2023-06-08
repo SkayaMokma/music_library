@@ -1,53 +1,49 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { Fragment } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import Gallery from './Components/Gallery.js'
 import SearchBar from './Components/SearchBar.js'
 import AlbumView from './Components/AlbumView.js'
 import ArtistView from './Components/ArtistView.js'
+import { createResource as fetchData } from './helper'
+
+
+
 
 function App(){
     let [search, setSearch] = useState('')
     let [message, setMessage] = useState('Search for Music!')
-    let [data, setData] = useState([])
+    let [data, setData] = useState(null)
 
     //gets the data from itunes everytime the search is changed
     useEffect(() => {
-        const fetchData= async () => {
-            const API_URL = `https://itunes.apple.com/search?term=${encodeURI(search)}`
-            const response= await fetch(API_URL)
-            const data= await response.json()
-            if(data.results.length>0){
-                setData(data.results)
-            }else{
-                setMessage('not found')
-            }
+        if (searchTerm) {
+            setData(fetchData(searchTerm))
         }
-
-        if(search) fetchData()
-    }, [search])
-
+    }, [searchTerm])
+    
     //makes it so that when submited it changes the searched term
     const handleSearch= (e, term) => {
         e.preventDefault()
         setSearch(term)
     }   
 
+    const renderGallery = () => {
+        if(data) {
+            return (
+                <Suspense fallback={<Spinner />}>
+                    <Gallery data={data} />
+                </Suspense>
+            )
+        }
+    }
+    
+
     return (
-        <div>
-        {message}
-            <Router>
-                <Routes>
-                    <Route path="/" element={
-                        <Fragment>
-                            <SearchBar handleSearch={handleSearch}/>
-                            <Gallery data={data} />
-                        </Fragment>
-                    } />
-                    <Route path="/album/:id" element={<AlbumView />} />
-                    <Route path="/artist/:id" element={<ArtistView />} />
-                </Routes>
-            </Router>
+        <div className="App">
+            <SearchBar handleSearch={handleSearch} />
+            {message}
+            {renderGallery()}
         </div>
     )
     
